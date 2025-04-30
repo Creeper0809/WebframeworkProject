@@ -1,0 +1,44 @@
+/* 1) html/body 전체 */
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+/* 2) 맵을 풀스크린 뒤에 고정 (z-index:0) */
+#map {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+}
+
+/* 3) 네비바를 화면 상단에 고정 (z-index:10) */
+header.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
+}
+
+/* 4) 푸터를 화면 하단에 고정 (z-index:10) */
+footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
+  background: #f8f9fa; /* 원하시는 배경색 */
+  text-align: center;
+  padding: .75rem 0;
+}
+
+/* 5) 고정된 네비바/푸터 때문에 밀려서 가려지는 본문이 있다면... */
+body {
+  /* header 높이(56px) + footer 높이(~50px) 만큼 패딩 */
+  padding-top: 56px;
+  padding-bottom: 50px;
+}
