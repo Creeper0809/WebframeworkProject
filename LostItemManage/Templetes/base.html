@@ -1,73 +1,47 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}LostItemManage{% endblock %}</title>
-
-  <!-- Bootstrap 5 CSS -->
-  <link
-    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
-    rel="stylesheet"
-  >
-
-  {% load static %}
-  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-
-  <!-- 맵 div(고정된 뒤쪽에 깔림) -->
-  <div id="map"></div>
-
-  <!-- 네비바 (고정된 앞쪽) -->
-  <header class="navbar navbar-expand-lg navbar-light bg-white">
-    <div class="container">
-      <a class="navbar-brand" href="/">LostItemManage</a>
-      <button
-        class="navbar-toggler"
-        type="button"
-        data-bs-toggle="collapse"
-        data-bs-target="#navMenu"
-      >
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navMenu">
-        <ul class="navbar-nav ms-auto">
-          {% if user.is_authenticated %}
-            <li class="nav-item">
-              <a class="nav-link" href="#">{{ user.email }}</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="{% url 'account:logout' %}">로그아웃</a>
-            </li>
-          {% else %}
-            <li class="nav-item">
-              <a class="nav-link" href="{% url 'account:login' %}">로그인</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="{% url 'account:register' %}">회원가입</a>
-            </li>
-          {% endif %}
-        </ul>
-      </div>
+<body class="flex flex-col h-screen">
+  <!-- 네비바 (앞쪽 고정) -->
+  <header class="fixed top-0 inset-x-0 bg-white shadow z-20">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+      <a href="/" class="text-xl font-semibold">LostItemManage</a>
+      <nav class="space-x-4">
+        {% if user.is_authenticated %}
+          <span class="text-gray-700">{{ user.email }}</span>
+          <a href="{% url 'account:logout' %}" class="text-blue-600 hover:underline">로그아웃</a>
+        {% else %}
+          <a href="{% url 'account:login' %}" class="text-blue-600 hover:underline">로그인</a>
+          <a href="{% url 'account:register' %}" class="text-blue-600 hover:underline">회원가입</a>
+        {% endif %}
+      </nav>
     </div>
   </header>
 
-  <!-- 메인 컨텐츠는 필요에 따라 z-index:5 로 맵 위에 표시 -->
-  <main class="container my-4">
+  <!-- 폼 컨테이너 (body 직속, 숨김) -->
+  {% if user.is_authenticated %}
+  <div id="form-container">
     {% block content %}{% endblock %}
+  </div>
+  {% endif %}
+
+  <!-- 메인 컨텐츠 영역 (스크롤 가능) -->
+  <main class="flex-1 overflow-auto pt-16 pb-16">
+    {% block main_content %}{% endblock %}
   </main>
 
-  <!-- 푸터 (고정된 앞쪽) -->
-  <footer>
+  <!-- 푸터 (앞쪽 고정) -->
+  <footer class="fixed bottom-0 inset-x-0 bg-white shadow z-20 text-center py-2">
     &copy; 2025 LostItemManage
   </footer>
 
-  <!-- Bootstrap JS -->
-  <script
-    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
-  ></script>
-
+  <!-- 추가 스크립트는 각 템플릿의 extra_js 블록에서 로드 -->
   {% block extra_js %}{% endblock %}
 </body>
 </html>
