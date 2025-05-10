@@ -25,11 +25,9 @@
   </header>
 
   <!-- 폼 컨테이너 (body 직속, 숨김) -->
-  {% if user.is_authenticated %}
   <div id="form-container">
     {% block content %}{% endblock %}
   </div>
-  {% endif %}
 
   <!-- 메인 컨텐츠 영역 (스크롤 가능) -->
   <main class="flex-1 overflow-auto pt-16 pb-16">

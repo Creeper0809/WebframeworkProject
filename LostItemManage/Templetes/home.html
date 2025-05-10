@@ -1,4 +1,6 @@
 {% extends 'base.html' %}
+{% load static %}
+
 {% block title %}메인 | LostItemManage{% endblock %}
 
 {% block main_content %}
@@ -8,244 +10,73 @@
 {% block content %}
 <!-- 유실물 등록 폼 -->
 <form id="lost-item-form" class="fixed top-16 right-8 bg-white p-6 rounded-lg shadow-lg w-80 hidden z-40">
-    <h5 class="text-lg font-semibold mb-4">유실물 등록</h5>
-    <input type="hidden" name="latitude" id="latitude">
-    <input type="hidden" name="longitude" id="longitude">
-    <div class="mb-2">
-        <label for="title" class="block text-sm font-medium text-gray-700">제목</label>
-        <input type="text" id="title" name="title" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm"/>
-    </div>
-    <div class="mb-2">
-        <label for="description" class="block text-sm font-medium text-gray-700">설명</label>
-        <textarea id="description" name="description" rows="4" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm"></textarea>
-    </div>
-    <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700">등록</button>
+  <h5 class="text-lg font-semibold mb-4">유실물 등록</h5>
+  <input type="hidden" id="latitude" name="latitude">
+  <input type="hidden" id="longitude" name="longitude">
+  <div class="mb-2">
+    <label for="title" class="block text-sm font-medium text-gray-700">제목</label>
+    <input type="text" id="title" name="title" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm"/>
+  </div>
+  <div class="mb-2">
+    <label for="description" class="block text-sm font-medium text-gray-700">설명</label>
+    <textarea id="description" name="description" rows="4" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm"></textarea>
+  </div>
+  <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700">등록</button>
 </form>
 
 <!-- 유실물 상세 정보 패널 -->
 <div id="lost-item-detail" class="fixed top-16 right-8 bg-white p-6 rounded-lg shadow-lg w-96 hidden z-30">
-    <form id="update-form">
-        <!-- 읽기 모드: 제목 -->
-        <h5 id="detail-title" class="text-xl font-semibold mb-2"></h5>
-        <!-- 읽기 모드: 상태 -->
-        <p id="detail-status" class="text-sm text-gray-600 mb-2"></p>
-        <!-- 읽기 모드: 설명 -->
-        <p id="detail-description" class="mb-4 text-sm text-gray-700"></p>
+  <form id="update-form">
+    <h5 id="detail-title" class="text-xl font-semibold mb-2"></h5>
+    <p id="detail-status" class="text-sm text-gray-600 mb-2"></p>
+    <p id="detail-description" class="mb-4 text-sm text-gray-700"></p>
 
-        <!-- 편집 모드: 제목 -->
-        <input type="text" id="edit-title" class="text-xl font-semibold mb-2 w-full border px-2 py-1 rounded hidden" />
-        <!-- 편집 모드: 설명 -->
-        <textarea id="edit-description" class="mb-4 text-sm w-full border px-2 py-1 rounded hidden"></textarea>
-        <!-- 편집 모드: 상태 선택 -->
-        <div id="status-section" class="mb-4 hidden">
-            <label for="status-select" class="text-sm font-medium">상태 변경</label>
-            <select id="status-select" class="block w-full mt-1 border rounded px-2 py-1 text-sm">
-                <option value="LOST">분실</option>
-                <option value="FOUND">습득</option>
-                <option value="RETURNED">반환</option>
-            </select>
-        </div>
-        <!-- 편집 모드: 버튼 -->
-        <div id="edit-buttons" class="flex justify-end space-x-2 hidden">
-            <button id="cancel-edit" type="button" class="bg-gray-400 text-white px-3 py-1 rounded text-sm">취소</button>
-            <button id="save-update" type="submit" class="bg-green-600 text-white px-3 py-1 rounded text-sm">저장</button>
-        </div>
-        <!-- 수정 버튼 (글쓴이만) -->
-        <button id="edit-button" type="button" class="mt-2 bg-yellow-500 text-white px-3 py-1 rounded text-sm hidden">수정</button>
-    </form>
-
-    <hr class="my-2">
-    <div>
-        <h6 class="text-sm font-semibold mb-1">댓글</h6>
-        <div id="comment-list" class="space-y-2 mb-2 text-sm text-gray-700"></div>
-        <input type="hidden" id="parent-comment-id" name="parent_id">
-        <form id="comment-form">
-            <textarea id="comment-content" rows="2" required class="w-full border rounded text-sm px-2 py-1"></textarea>
-            <button type="submit" class="mt-1 bg-blue-500 text-white px-3 py-1 rounded text-sm">댓글 작성</button>
-        </form>
+    <input type="text" id="edit-title" class="text-xl font-semibold mb-2 w-full border px-2 py-1 rounded hidden" />
+    <textarea id="edit-description" class="mb-4 text-sm w-full border px-2 py-1 rounded hidden"></textarea>
+    <div id="status-section" class="mb-4 hidden">
+      <label for="status-select" class="text-sm font-medium">상태 변경</label>
+      <select id="status-select" class="block w-full mt-1 border rounded px-2 py-1 text-sm">
+        <option value="LOST">분실</option>
+        <option value="FOUND">습득</option>
+        <option value="RETURNED">반환</option>
+      </select>
     </div>
+    <div id="edit-buttons" class="flex justify-end space-x-2 hidden">
+      <button id="cancel-edit" type="button" class="bg-gray-400 text-white px-3 py-1 rounded text-sm">취소</button>
+      <button id="save-update" type="submit" class="bg-green-600 text-white px-3 py-1 rounded text-sm">저장</button>
+    </div>
+    <button id="edit-button" type="button" class="mt-2 bg-yellow-500 text-white px-3 py-1 rounded text-sm hidden">수정</button>
+  </form>
+
+  <hr class="my-2">
+  <div>
+    <h6 class="text-sm font-semibold mb-1">댓글</h6>
+    <div id="comment-list" class="space-y-2 mb-2 text-sm text-gray-700"></div>
+    <input type="hidden" id="parent-comment-id" name="parent_id">
+    <form id="comment-form">
+      <textarea id="comment-content" rows="2" required class="w-full border rounded text-sm px-2 py-1"></textarea>
+      <button type="submit" class="mt-1 bg-blue-500 text-white px-3 py-1 rounded text-sm">댓글 작성</button>
+    </form>
+  </div>
 </div>
-{% endblock %}
+
+{% endblock content %}
 
 {% block extra_js %}
 <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=e1f93f9c861e7e2dc5674becfdcdf4a9&autoload=false"></script>
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-    kakao.maps.load(function () {
-        const map = new kakao.maps.Map(document.getElementById('map'), {
-            center: new kakao.maps.LatLng(33.450701, 126.570667),
-            level: 3,
-            disableDoubleClickZoom: true
-        });
-
-        const currentUserId = parseInt("{{ user.id|default:0 }}");
-        let tempMarker = null;
-
-        function setEditMode(enabled) {
-            // 읽기/편집 모드 토글
-            document.getElementById('detail-title').classList.toggle('hidden', enabled);
-            document.getElementById('detail-status').classList.toggle('hidden', enabled);
-            document.getElementById('detail-description').classList.toggle('hidden', enabled);
-            document.getElementById('edit-title').classList.toggle('hidden', !enabled);
-            document.getElementById('edit-description').classList.toggle('hidden', !enabled);
-            document.getElementById('status-section').classList.toggle('hidden', !enabled);
-            document.getElementById('edit-buttons').classList.toggle('hidden', !enabled);
-            document.getElementById('edit-button').classList.toggle('hidden', enabled);
-        }
-
-        function createMarker(item) {
-            const pos = new kakao.maps.LatLng(item.latitude, item.longitude);
-            const markerOptions = {position: pos, map: map};
-            if (item.user_id === currentUserId) {
-                markerOptions.image = new kakao.maps.MarkerImage(
-                    'https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/marker_red.png',
-                    new kakao.maps.Size(24, 35)
-                );
-            }
-            const m = new kakao.maps.Marker(markerOptions);
-            kakao.maps.event.addListener(m, 'click', () => showDetail(item));
-        }
-
-        function renderComments(comments, list, depth = 0) {
-            comments.forEach(c => {
-                const el = document.createElement('div');
-                el.className = `cursor-pointer hover:bg-gray-100 p-1 rounded ml-${depth * 4}`;
-                el.innerHTML = `<strong>${c.user}</strong>: ${c.content}`;
-                el.onclick = function () {
-                    if (c.parent === -1) {
-                        document.getElementById('parent-comment-id').value = c.id;
-                        document.querySelectorAll('#comment-list div').forEach(div => div.classList.remove('bg-blue-100'));
-                        el.classList.add('bg-blue-100');
-                    }
-                };
-                list.appendChild(el);
-                if (c.replies) renderComments(c.replies, list, depth + 1);
-            });
-        }
-
-        function showDetail(item) {
-            const titleEl = document.getElementById('detail-title');
-            const statusEl = document.getElementById('detail-status');
-            const descEl = document.getElementById('detail-description');
-            const editTitle = document.getElementById('edit-title');
-            const editDesc = document.getElementById('edit-description');
-            const statusSelect = document.getElementById('status-select');
-            const saveBtn = document.getElementById('save-update');
-            const editBtn = document.getElementById('edit-button');
-            const cancelBtn = document.getElementById('cancel-edit');
-
-            // 데이터 설정
-            titleEl.innerText = item.title;
-            statusEl.innerText = `상태: ${item.status || 'LOST'}`;
-            editTitle.value = item.title;
-            descEl.innerText = item.description;
-            editDesc.value = item.description;
-            statusSelect.value = item.status || 'LOST';
-
-            // 작성자 여부 확인 후 수정 버튼 표시
-            if (item.user_id === currentUserId) {
-                editBtn.classList.remove('hidden');
-                editBtn.onclick = () => setEditMode(true);
-                cancelBtn.onclick = () => setEditMode(false);
-            } else {
-                editBtn.classList.add('hidden');
-                setEditMode(false);
-            }
-
-            // 패널 표시
-            document.getElementById('lost-item-detail').classList.remove('hidden');
-            document.getElementById('lost-item-form').classList.add('hidden');
-
-            // 업데이트 폼 제출 처리
-            document.getElementById('update-form').onsubmit = function (e) {
-                e.preventDefault();
-                const newTitle = editTitle.value.trim();
-                const newDesc = editDesc.value.trim();
-                const newStatus = statusSelect.value;
-
-                fetch(`/item/${item.id}/`, {
-                    method: 'PATCH',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({title: newTitle, description: newDesc, status: newStatus})
-                }).then(res => res.json()).then(updated => {
-                    // 로컬 데이터 갱신
-                    item.title = updated.title;
-                    item.description = updated.description;
-                    item.status = updated.status;
-                    // 읽기 모드로 복귀 및 디테일 갱신
-                    setEditMode(false);
-                    showDetail(item);
-                    alert("수정 완료");
-                }).catch(() => alert("수정 실패"));
-            };
-
-            // 댓글 렌더링 및 추가
-            const list = document.getElementById('comment-list');
-            list.innerHTML = '';
-            document.getElementById('parent-comment-id').value = '';
-            renderComments(item.comments || [], list);
-
-            document.getElementById('comment-form').onsubmit = function (e) {
-                e.preventDefault();
-                const content = document.getElementById('comment-content').value.trim();
-                const parentValue = document.getElementById('parent-comment-id').value;
-                const parent = parentValue ? parseInt(parentValue) : null;
-                if (!content) return;
-                fetch(`/item/${item.id}/comment/`, {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({content, parent})
-                }).then(res => res.json()).then(newComment => {
-                    item.comments = item.comments || [];
-                    if (!parent) item.comments.push({...newComment, replies: []});
-                    else {
-                        const parentComment = item.comments.find(c => c.id === parent);
-                        parentComment.replies = parentComment.replies || [];
-                        parentComment.replies.push(newComment);
-                    }
-                    showDetail(item);
-                    document.getElementById('comment-content').value = '';
-                }).catch(() => alert('댓글 등록 실패'));
-            };
-        }
-
-        // 기존 데이터 마커 생성
-        fetch('/item/')
-            .then(res => res.json())
-            .then(items => items.forEach(item => createMarker(item)));
-
-        // 더블 클릭으로 신규 등록
-        if (currentUserId !== 0) {
-            kakao.maps.event.addListener(map, 'dblclick', function (e) {
-                const coord = e.latLng;
-                if (!tempMarker) tempMarker = new kakao.maps.Marker({position: coord, map: map});
-                else tempMarker.setPosition(coord);
-
-                document.getElementById('latitude').value = coord.getLat();
-                document.getElementById('longitude').value = coord.getLng();
-                document.getElementById('lost-item-form').classList.remove('hidden');
-                document.getElementById('lost-item-detail').classList.add('hidden');
-            });
-        }
-
-        // 신규 등록 처리
-        document.getElementById('lost-item-form').addEventListener('submit', function (evt) {
-            evt.preventDefault();
-            const data = Object.fromEntries(new FormData(this).entries());
-            fetch('/item/', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({...data, user_id: currentUserId})
-            }).then(res => res.json()).then(item => {
-                item.comments = [];
-                createMarker(item);
-                tempMarker = null;
-                document.getElementById('lost-item-form').reset();
-                document.getElementById('lost-item-form').classList.add('hidden');
-                showDetail(item);
-            }).catch(() => alert('등록 실패'));
-        });
-    });
-});
+  window.currentUserId = '{{ user.id|default:0 }}';
 </script>
-{% endblock %}
+<script type="module">
+  import { initMap } from '{% static "js/map.js" %}';
+  import { initForm } from '{% static "js/formHandler.js" %}';
+  import { setUserId } from '{% static "js/detailPanel.js" %}';
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const uid = parseInt(window.currentUserId, 10) || 0;
+    setUserId(uid);
+    initMap(uid);
+    initForm(uid);
+  });
+</script>
+{% endblock extra_js %}
