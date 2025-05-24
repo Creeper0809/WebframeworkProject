@@ -1,3 +1,5 @@
+import os
+
 from django.http import JsonResponse, HttpResponseNotFound
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
@@ -12,14 +14,14 @@ import json
 def serialize_comment(comment):
     return {
         'id': comment.id,
-        'user': comment.user.username,
+        'user': comment.user_id.username,
         'content': comment.content,
         'created_at': comment.created_at.isoformat(),
         'parent': comment.parent.id if comment.parent else -1,
         'replies': [
             {
                 'id': reply.id,
-                'user': reply.user.username,
+                'user': reply.user_id.username,
                 'content': reply.content,
                 'created_at': reply.created_at.isoformat(),
                 'parent': reply.parent.id if reply.parent else -1
@@ -31,34 +33,55 @@ def serialize_comment(comment):
 @method_decorator(csrf_exempt, name='dispatch')
 class LostItemListView(View):
     def get(self, request):
-        items = LostItem.objects.prefetch_related(
-            Prefetch('comments', queryset=Comment.objects.filter(parent__isnull=True)
-                     .prefetch_related('replies', 'user'))
-        ).all()
-
+        items = LostItem.objects.all().order_by('-created_at')
         result = []
         for item in items:
-            item_dict = model_to_dict(item)
-            item_dict['user_id'] = item.user_id.id if item.user_id else None
-            item_dict['comments'] = [serialize_comment(c) for c in item.comments.all()]
-            result.append(item_dict)
-
+            result.append({
+                'id':          item.id,
+                'title':       item.title,
+                'description': item.description,
+                'latitude':    item.latitude,
+                'longitude':   item.longitude,
+                'category':    item.get_category_display(),
+                'status':      item.get_status_display(),
+                'image_url':   item.image.url if item.image else None,
+                'user':        item.user.username,
+                'created_at':  item.created_at.isoformat(),
+            })
         return JsonResponse(result, safe=False)
 
     def post(self, request):
-        try:
-            data = json.loads(request.body)
-            item = LostItem.objects.create(
-                title=data.get('title'),
-                description=data.get('description', ''),
-                latitude=data.get('latitude'),
-                longitude=data.get('longitude'),
-                user_id=request.user,
-                created_at=timezone.now(),
-            )
-            return JsonResponse({'id': item.id}, status=201)
-        except Exception as e:
-            return JsonResponse({'error': str(e)}, status=400)
+        # 1) 반드시 받아야 할 필드 검증
+        title = request.POST.get('title')
+        if not title:
+            return JsonResponse({'error': '제목을 입력해주세요.'}, status=400)
+
+        # 2) 나머지 필드
+        description = request.POST.get('description', '')
+        latitude = request.POST.get('latitude')
+        longitude = request.POST.get('longitude')
+
+        # 3) 이미지 파일 검증 (선택 사항)
+        img = request.FILES.get('image')
+        if img:
+            ext = os.path.splitext(img.name)[1].lower()
+            if ext not in ['.jpg', '.png']:
+                return JsonResponse(
+                    {'error': '이미지는 .jpg 혹은 .png만 업로드 가능합니다.'},
+                    status=400
+                )
+
+        # 4) DB에 저장
+        item = LostItem.objects.create(
+            title=title,
+            description=description,
+            latitude=latitude,
+            longitude=longitude,
+            user=request.user,
+            created_at=timezone.now(),
+            image=img
+        )
+        return JsonResponse({'id': item.id}, status=201)
 
 @method_decorator(csrf_exempt, name='dispatch')
 class LostItemDetailView(View):
@@ -66,13 +89,15 @@ class LostItemDetailView(View):
         try:
             item = LostItem.objects.prefetch_related(
                 Prefetch('comments', queryset=Comment.objects.filter(parent__isnull=True)
-                         .prefetch_related('replies', 'user'))
+                         .prefetch_related('replies', 'user_id'))
             ).get(id=id)
 
             item_dict = model_to_dict(item)
-            item_dict['user_id'] = item.user_id.id if item.user_id else None
+            item_dict.pop('image', None)
+            item_dict['image_url'] = item.image.url if item.image else None
+            item_dict['user_id'] = item.user.id if item.user else None
             item_dict['comments'] = [serialize_comment(c) for c in item.comments.all()]
-
+            item_dict["created_at"] = item.created_at.isoformat()[:-6] + "Z"
             return JsonResponse(item_dict)
         except LostItem.DoesNotExist:
             return HttpResponseNotFound('Item not found')
@@ -88,7 +113,7 @@ class LostItemDetailView(View):
     def patch(self, request, id):
         try:
             item = LostItem.objects.get(id=id)
-            if item.user_id != request.user:
+            if item.user != request.user:
                 return JsonResponse({'error': '수정 권한이 없습니다.'}, status=403)
 
             data = json.loads(request.body)
@@ -132,13 +157,13 @@ class CommentCreateView(View):
             parent = Comment.objects.filter(id=parent_id).first() if parent_id and int(parent_id) != -1 else None
             comment = Comment.objects.create(
                 lost_item=lost_item,
-                user=request.user,
+                user_id=request.user,
                 content=content,
                 parent=parent
             )
             return JsonResponse({
                 'id': comment.id,
-                'user': comment.user.username,
+                'user': comment.user_id.username,
                 'content': comment.content,
                 'created_at': comment.created_at.isoformat(),
                 'parent': parent.id if parent else -1,

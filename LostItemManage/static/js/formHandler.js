@@ -1,20 +1,37 @@
-export function initForm(currentUserId) {
+export function initForm(userId) {
   const form = document.getElementById('lost-item-form');
+  console.log(form);
   if (!form) return;
 
-  form.onsubmit = async e => {
+  form.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const data = Object.fromEntries(new FormData(form).entries());
-    data.user_id = currentUserId;
-    const item = await fetch('/item/', {
-      method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data)
-    }).then(r=>r.json());
 
-    // 마커 생성 & 상세 표시
-    if(window.createMarker) createMarker(item);
-    if(window.showDetail) showDetail(item);
+    const formData = new FormData(form);
+    console.log("asd");
+    console.log(formData);
+    try {
+      const res = await fetch('/item/', {
+        method: 'POST',
+        headers: { 'X-CSRFToken': formData.get('csrfmiddlewaretoken') },
+        body: formData
+      });
 
-    form.reset();
-    form.classList.add('hidden');
-  };
+      const data = await res.json();
+      if (!res.ok) {
+        alert(data.error || '등록에 실패했습니다.');
+        return;
+      }
+
+      alert('유실물이 등록되었습니다!');
+
+      form.reset();
+      form.classList.add('hidden');
+
+      window.location.reload();
+
+    } catch (err) {
+      console.error(err);
+      alert('서버와 통신 중 오류가 발생했습니다.');
+    }
+  });
 }

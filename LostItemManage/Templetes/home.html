@@ -8,75 +8,136 @@
 {% endblock %}
 
 {% block content %}
-<!-- 유실물 등록 폼 -->
-<form id="lost-item-form" class="fixed top-16 right-8 bg-white p-6 rounded-lg shadow-lg w-80 hidden z-40">
+<!-- 유실물 등록 폼… -->
+<form id="lost-item-form"
+      enctype="multipart/form-data"
+      class="fixed top-16 right-8 bg-white p-6 rounded-2xl shadow-lg w-80 hidden z-40">
   <h5 class="text-lg font-semibold mb-4">유실물 등록</h5>
-  <input type="hidden" id="latitude" name="latitude">
+  <input type="hidden" id="latitude"  name="latitude">
   <input type="hidden" id="longitude" name="longitude">
-  <div class="mb-2">
+
+  <div class="mb-4">
     <label for="title" class="block text-sm font-medium text-gray-700">제목</label>
-    <input type="text" id="title" name="title" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm"/>
+    <input type="text" id="title" name="title" required
+           class="mt-1 block w-full border-gray-300 rounded-md shadow-sm px-2 py-1"/>
   </div>
-  <div class="mb-2">
+
+  <div class="mb-4">
     <label for="description" class="block text-sm font-medium text-gray-700">설명</label>
-    <textarea id="description" name="description" rows="4" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm"></textarea>
+    <textarea id="description" name="description" rows="4" required
+              class="mt-1 block w-full border-gray-300 rounded-md shadow-sm px-2 py-1"></textarea>
   </div>
-  <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700">등록</button>
+
+  <div class="mb-4">
+    <label for="image" class="block text-sm font-medium text-gray-700">
+      사진 (.jpg, .png만 허용)
+    </label>
+    <input type="file" id="image" name="image"
+           accept=".jpg,.png"
+           class="mt-1 block w-full text-sm"/>
+  </div>
+
+  <button type="submit"
+          class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded text-sm">
+    등록
+  </button>
 </form>
-
 <!-- 유실물 상세 정보 패널 -->
-<div id="lost-item-detail" class="fixed top-16 right-8 bg-white p-6 rounded-lg shadow-lg w-96 hidden z-30">
-  <form id="update-form">
-    <h5 id="detail-title" class="text-xl font-semibold mb-2"></h5>
-    <p id="detail-status" class="text-sm text-gray-600 mb-2"></p>
-    <p id="detail-description" class="mb-4 text-sm text-gray-700"></p>
+<div id="lost-item-detail"
+     class="fixed top-16 right-8 bg-white p-6 rounded-2xl shadow-lg w-96 hidden z-30">
+  <form id="update-form" class="space-y-2">
+    <!-- 제목 + 날짜 -->
+    <div class="flex items-baseline justify-between">
+      <h5 id="detail-title" class="text-2xl font-bold text-gray-800"></h5>
+      <p id="detail-date" class="text-xs text-gray-500"></p>
+    </div>
 
-    <input type="text" id="edit-title" class="text-xl font-semibold mb-2 w-full border px-2 py-1 rounded hidden" />
-    <textarea id="edit-description" class="mb-4 text-sm w-full border px-2 py-1 rounded hidden"></textarea>
-    <div id="status-section" class="mb-4 hidden">
+    <!-- 사진 -->
+    <div id="image-container" class="mb-4 hidden">
+      <img id="detail-image"
+           src=""
+           alt="유실물 사진"
+           class="w-full h-auto rounded-lg border"/>
+    </div>
+
+    <!-- 상태 / 설명 -->
+    <p id="detail-status" class="inline-block px-2 py-1 text-xs font-medium rounded-full text-white bg-blue-500"></p>
+    <p id="detail-description" class="mt-2 text-sm text-gray-700"></p>
+
+    <!-- 수정 입력 폼 (숨김) -->
+    <input type="text" id="edit-title"
+           class="w-full border px-2 py-1 rounded hidden"/>
+    <textarea id="edit-description"
+              class="w-full border px-2 py-1 rounded hidden"></textarea>
+    <div id="status-section" class="hidden">
       <label for="status-select" class="text-sm font-medium">상태 변경</label>
-      <select id="status-select" class="block w-full mt-1 border rounded px-2 py-1 text-sm">
+      <select id="status-select" class="w-full mt-1 border rounded px-2 py-1 text-sm">
         <option value="LOST">분실</option>
         <option value="FOUND">습득</option>
         <option value="RETURNED">반환</option>
       </select>
     </div>
-    <div id="edit-buttons" class="flex justify-end space-x-2 hidden">
-      <button id="cancel-edit" type="button" class="bg-gray-400 text-white px-3 py-1 rounded text-sm">취소</button>
-      <button id="save-update" type="submit" class="bg-green-600 text-white px-3 py-1 rounded text-sm">저장</button>
+
+    <!-- 버튼 그룹 -->
+    <div class="flex space-x-2">
+      <button id="edit-button" type="button"
+              class="flex-1 bg-yellow-400 hover:bg-yellow-500 text-white py-1 rounded text-sm hidden">
+        수정
+      </button>
+      <button id="save-update" type="submit"
+              class="flex-1 bg-green-500 hover:bg-green-600 text-white py-1 rounded text-sm hidden">
+        저장
+      </button>
+      <button id="cancel-edit" type="button"
+              class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-700 py-1 rounded text-sm hidden">
+        취소
+      </button>
+      <button id="delete-button" type="button"
+              class="flex-1 bg-red-500 hover:bg-red-600 text-white py-1 rounded text-sm hidden">
+        삭제
+      </button>
     </div>
-    <button id="edit-button" type="button" class="mt-2 bg-yellow-500 text-white px-3 py-1 rounded text-sm hidden">수정</button>
   </form>
 
-  <hr class="my-2">
+  <hr class="my-4">
+
+  <!-- 댓글 섹션 -->
   <div>
-    <h6 class="text-sm font-semibold mb-1">댓글</h6>
-    <div id="comment-list" class="space-y-2 mb-2 text-sm text-gray-700"></div>
-    <input type="hidden" id="parent-comment-id" name="parent_id">
-    <form id="comment-form">
-      <textarea id="comment-content" rows="2" required class="w-full border rounded text-sm px-2 py-1"></textarea>
-      <button type="submit" class="mt-1 bg-blue-500 text-white px-3 py-1 rounded text-sm">댓글 작성</button>
+    <h6 class="text-sm font-semibold mb-2">댓글</h6>
+    <div id="comment-list"
+         class="space-y-2 mb-2 text-sm text-gray-700 max-h-48 overflow-y-auto"></div>
+
+    <form id="comment-form" class="space-y-2">
+      <input type="hidden" id="parent-comment-id" name="parent_id">
+      <textarea id="comment-content" rows="2" required
+                class="w-full border rounded px-2 py-1 text-sm"></textarea>
+      <button type="submit"
+              class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1 rounded text-sm">
+        댓글 작성
+      </button>
     </form>
   </div>
 </div>
-
 {% endblock content %}
 
 {% block extra_js %}
 <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=e1f93f9c861e7e2dc5674becfdcdf4a9&autoload=false"></script>
 <script>
-  window.currentUserId = '{{ user.id|default:0 }}';
+  window.currentUserId = '{{ user.id|default:"0" }}';
 </script>
+<script type="module" src="{% static 'js/formHandler.js' %}"></script>
+<script type="module" src="{% static 'js/detailPanel.js' %}"></script>
 <script type="module">
   import { initMap } from '{% static "js/map.js" %}';
   import { initForm } from '{% static "js/formHandler.js" %}';
-  import { setUserId } from '{% static "js/detailPanel.js" %}';
+  import { setUserId, showDetail } from '{% static "js/detailPanel.js" %}';
 
   document.addEventListener('DOMContentLoaded', () => {
-    const uid = parseInt(window.currentUserId, 10) || 0;
+    const uid = Number(window.currentUserId) || 0;
     setUserId(uid);
     initMap(uid);
     initForm(uid);
+    window.showDetail = showDetail;
   });
 </script>
 {% endblock extra_js %}

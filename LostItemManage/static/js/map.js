@@ -25,6 +25,7 @@ export function initMap(currentUserId) {
       let tempMarker;
       kakao.maps.event.addListener(map, 'dblclick', e => {
         const coord = e.latLng;
+        console.log(coord.getLat());
         if (!tempMarker) {
           tempMarker = new kakao.maps.Marker({ map });
         }
