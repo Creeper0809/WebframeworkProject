@@ -61,6 +61,8 @@ export async function showDetail(item) {
   const parentInput= $id('parent-comment-id');
   const contentInp = $id('comment-content');
 
+  const lostItemForm = $id('lost-item-form');
+
   // 1) 초기화
   panel.classList.remove('hidden');
   form.classList.remove('hidden');
@@ -68,6 +70,7 @@ export async function showDetail(item) {
   saveBtn.classList.add('hidden');
   deleteBtn.classList.remove('hidden');
   editBtn.classList.remove('hidden');
+  lostItemForm.classList.add('hidden');
 
   // 2) 데이터 바인딩
   titleEl.textContent = item.title;
