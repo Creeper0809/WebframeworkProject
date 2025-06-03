@@ -8,7 +8,7 @@ from django.utils import timezone
 from django.forms.models import model_to_dict
 from django.db.models import Prefetch
 
-from .models import LostItem, Comment
+from .models import LostItem, Comment, Category
 import json
 
 def serialize_comment(comment):
@@ -33,9 +33,28 @@ def serialize_comment(comment):
 @method_decorator(csrf_exempt, name='dispatch')
 class LostItemListView(View):
     def get(self, request):
-        items = LostItem.objects.all().order_by('-created_at')
+        # 1) 쿼리 파라미터 받아오기
+        q             = request.GET.get('q', '').strip()         # 검색어
+        category_code = request.GET.get('category', '').strip()  # 카테고리 코드 (예: 'E', 'W', …)
+
+        # 2) 기본 queryset: 생성일 역순
+        queryset = LostItem.objects.all().order_by('-created_at')
+
+        # 3) “검색어” 필터링 (title LIKE)
+        if q:
+            queryset = queryset.filter(title__icontains=q)
+
+        # 4) “카테고리” 필터링
+        if category_code:
+            valid_codes = [c[0] for c in Category.choices]
+            if category_code in valid_codes:
+                queryset = queryset.filter(category=category_code)
+            else:
+                return JsonResponse({'error': '유효하지 않은 카테고리입니다.'}, status=400)
+
+        # 5) JSON 반환
         result = []
-        for item in items:
+        for item in queryset:
             result.append({
                 'id':          item.id,
                 'title':       item.title,
@@ -46,6 +65,7 @@ class LostItemListView(View):
                 'status':      item.get_status_display(),
                 'image_url':   item.image.url if item.image else None,
                 'user':        item.user.username,
+                'user_id':     item.user.id,
                 'created_at':  item.created_at.isoformat(),
             })
         return JsonResponse(result, safe=False)
@@ -60,6 +80,9 @@ class LostItemListView(View):
         description = request.POST.get('description', '')
         latitude = request.POST.get('latitude')
         longitude = request.POST.get('longitude')
+
+        category_value = request.POST.get('category', Category.ETC)
+        category_value = category_value if category_value != "" else Category.ETC
 
         # 3) 이미지 파일 검증 (선택 사항)
         img = request.FILES.get('image')
@@ -78,6 +101,7 @@ class LostItemListView(View):
             latitude=latitude,
             longitude=longitude,
             user=request.user,
+            category=category_value,
             created_at=timezone.now(),
             image=img
         )
@@ -97,6 +121,7 @@ class LostItemDetailView(View):
             item_dict['image_url'] = item.image.url if item.image else None
             item_dict['user_id'] = item.user.id if item.user else None
             item_dict['comments'] = [serialize_comment(c) for c in item.comments.all()]
+            item_dict['category'] = item.get_category_display()
             item_dict["created_at"] = item.created_at.isoformat()[:-6] + "Z"
             return JsonResponse(item_dict)
         except LostItem.DoesNotExist:

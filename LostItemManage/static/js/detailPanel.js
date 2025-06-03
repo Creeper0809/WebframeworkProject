@@ -54,6 +54,7 @@ export async function showDetail(item) {
   const descEl     = $id('detail-description');
   const imgCont    = $id('image-container');
   const imgEl      = $id('detail-image');
+  const categoryEl  = $id('detail-category');
   const editTitle  = $id('edit-title');
   const editDesc   = $id('edit-description');
   const statusSel  = $id('status-select');
@@ -79,6 +80,7 @@ export async function showDetail(item) {
   console.log(item.created_at);
   dateEl.textContent = dt.toLocaleString();
   statusEl.textContent = item.status;
+  categoryEl.textContent = item.category;
   descEl.textContent = item.description;
 
   // 이미지 표시

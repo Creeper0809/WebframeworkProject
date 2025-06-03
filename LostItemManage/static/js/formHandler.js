@@ -7,8 +7,6 @@ export function initForm(userId) {
     e.preventDefault();
 
     const formData = new FormData(form);
-    console.log("asd");
-    console.log(formData);
     try {
       const res = await fetch('/item/', {
         method: 'POST',

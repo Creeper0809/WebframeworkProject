@@ -4,6 +4,43 @@
 {% block title %}메인 | LostItemManage{% endblock %}
 
 {% block main_content %}
+
+<div id="filter-bar" class="fixed top-16 left-8 z-40 bg-white p-2 rounded shadow-md flex items-center space-x-2">
+    <!-- 검색창 -->
+    <input
+      id="filter-search"
+      type="text"
+      placeholder="제목으로 검색"
+      class="border-gray-300 rounded-md shadow-sm px-2 py-1 text-sm w-40"
+    />
+
+    <!-- 검색 버튼 (필요 시) -->
+    <button
+      id="search-button"
+      class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm"
+    >
+      검색
+    </button>
+
+    <!-- 카테고리 선택 -->
+    <label for="filter-category" class="text-sm font-medium text-gray-700">카테고리:</label>
+    <select
+      id="filter-category"
+      class="border-gray-300 rounded-md shadow-sm px-2 py-1 text-sm"
+    >
+      <option value="">전체</option>
+      <option value="E">전자기기</option>
+      <option value="W">지갑</option>
+      <option value="B">가방</option>
+      <option value="C">카드</option>
+      <option value="L">의류</option>
+      <option value="K">열쇠</option>
+      <option value="D">서류</option>
+      <option value="X">기타</option>
+    </select>
+  </div>
+
+
 <div id="map" class="w-full h-[calc(100vh-8rem)] relative z-0"></div>
 {% endblock %}
 
@@ -26,6 +63,21 @@
     <label for="description" class="block text-sm font-medium text-gray-700">설명</label>
     <textarea id="description" name="description" rows="4" required
               class="mt-1 block w-full border-gray-300 rounded-md shadow-sm px-2 py-1"></textarea>
+  </div>
+
+  <div class="mb-4">
+    <label for="category" class="block text-sm font-medium text-gray-700">카테고리</label>
+    <select id="category" name="category"
+            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm px-2 py-1 text-sm">
+      <option value="{{ Category.ELECTRONICS }}">전자기기</option>
+      <option value="{{ Category.WALLET }}">지갑</option>
+      <option value="{{ Category.BAG }}">가방</option>
+      <option value="{{ Category.CARD }}">카드</option>
+      <option value="{{ Category.CLOTHING }}">의류</option>
+      <option value="{{ Category.KEY }}">열쇠</option>
+      <option value="{{ Category.DOCUMENT }}">서류</option>
+      <option value="{{ Category.ETC }}" selected>기타</option>
+    </select>
   </div>
 
   <div class="mb-4">
@@ -62,6 +114,9 @@
 
     <!-- 상태 / 설명 -->
     <p id="detail-status" class="inline-block px-2 py-1 text-xs font-medium rounded-full text-white bg-blue-500"></p>
+    <p id="detail-category"
+         class="inline-block ml-2 px-2 py-1 text-xs font-medium rounded-full text-white bg-green-500"></p>
+
     <p id="detail-description" class="mt-2 text-sm text-gray-700"></p>
 
     <!-- 수정 입력 폼 (숨김) -->
@@ -121,14 +176,14 @@
 {% endblock content %}
 
 {% block extra_js %}
-<script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=e1f93f9c861e7e2dc5674becfdcdf4a9&autoload=false"></script>
+<script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=e1f93f9c861e7e2dc5674becfdcdf4a9&autoload=true"></script>
 <script>
   window.currentUserId = '{{ user.id|default:"0" }}';
 </script>
 <script type="module" src="{% static 'js/formHandler.js' %}"></script>
 <script type="module" src="{% static 'js/detailPanel.js' %}"></script>
 <script type="module">
-  import { initMap } from '{% static "js/map.js" %}';
+  import { initMap , fetchAndRenderItems } from '{% static "js/map.js" %}';
   import { initForm } from '{% static "js/formHandler.js" %}';
   import { setUserId, showDetail } from '{% static "js/detailPanel.js" %}';
 
@@ -137,6 +192,32 @@
     setUserId(uid);
     initMap(uid);
     initForm(uid);
+
+    fetchAndRenderItems('', '');
+
+    document.getElementById('search-button').addEventListener('click', () => {
+        const q = document.getElementById('filter-search').value.trim();
+        const cat = document.getElementById('filter-category').value;
+        fetchAndRenderItems(cat, q);
+      });
+
+      // ② Enter 키로 검색 가능하게 (검색창에 포커스된 상태에서 엔터 입력)
+      document.getElementById('filter-search').addEventListener('keyup', (e) => {
+        if (e.key === 'Enter') {
+          const q    = e.target.value.trim();
+          const cat  = document.getElementById('filter-category').value;
+          fetchAndRenderItems(cat, q);
+        }
+      });
+
+      // ③ 카테고리 선택이 바뀔 때마다 즉시 새로 고침
+      document.getElementById('filter-category').addEventListener('change', () => {
+        const cat = document.getElementById('filter-category').value;
+        const q   = document.getElementById('filter-search').value.trim();
+        fetchAndRenderItems(cat, q);
+      });
+
+
     window.showDetail = showDetail;
   });
 </script>
